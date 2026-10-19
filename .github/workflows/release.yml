@@ -19,6 +19,9 @@ jobs:
         with:
           node-version: 24
 
+      - name: 校验版本标签
+        run: node --input-type=module -e "import fs from 'node:fs'; const {version} = JSON.parse(fs.readFileSync('package.json', 'utf8')); if (process.env.GITHUB_REF_NAME !== 'v' + version) throw new Error('版本标签必须与 package.json 一致')"
+
       - name: 生成双语版本说明
         run: node scripts/extract-release-notes.mjs "$GITHUB_REF_NAME" release-notes.md
 

@@ -1,6 +1,8 @@
 import assert from 'node:assert/strict'
 import { readFileSync } from 'node:fs'
 import test from 'node:test'
+import React from 'react'
+import { renderToStaticMarkup } from 'react-dom/server'
 
 // 读发布产物 lib/client.js（npm test 先 build 再跑），确保验证的就是上线文件
 const client = readFileSync(new URL('../lib/client.js', import.meta.url), 'utf8')
@@ -45,8 +47,8 @@ test('没有工作区时不能保存，必须先创建', () => {
     assert.equal(workspaceIsListed(`D:${slash}proj${slash}`, [{ path: 'D:/proj' }]), true)
   const bind = source.slice(source.indexOf('function BindModal'), source.indexOf('function AccountSettingsPicker'))
   const picker = source.slice(source.indexOf('function AccountSettingsPicker'), source.indexOf('function CommandPermissionSettings'))
-  assert.match(bind, /disabled: busy \|\| !workspaceIsListed\(settings\.cwd, workspaces\)/)
-  assert.match(bind, /disabled: busy \|\| !workspaceIsListed\(settings\.cwd, workspaces\) \|\| !settings\.provider/)
+  assert.match(bind, /!workspaceIsListed\(settings\.cwd, workspaces\)/)
+  assert.match(bind, /setError\(t\("bind.defaultsRequired"\)\)/)
   assert.match(picker, /items\.length === 0/)
   assert.match(picker, /composer\.workspaceRequired/)
   assert.match(source, /"composer\.workspaceRequired": "请先添加工作区，否则无法保存"/)
@@ -75,23 +77,38 @@ test('账号保存完成前显示保存中，不提前进入绑定成功分支',
   assert.match(client, /if \(finished\.current \|\| saving\) return/)
   assert.match(client, /if \(event\.key !== "Escape"\) return;\s*event\.preventDefault\(\);\s*event\.stopPropagation\(\);\s*if \(typeof event\.stopImmediatePropagation === "function"\) event\.stopImmediatePropagation\(\);\s*if \(saving\) return;/)
   assert.match(client, /maskClosable: !saving/)
-  assert.match(client, /onChange: \(next\) => switchTab\(next\)/)
-  assert.match(client, /className: "ima-bind-tabs"/)
-  assert.match(client, /label: t\("bind\.tabsAria"\)/)
 })
 
-test('单方法渠道不渲染 tab 语义，双方法渠道常驻两个 tabpanel', () => {
-  const source = readFileSync(new URL('../client.js', import.meta.url), 'utf8')
-  const bind = source.slice(source.indexOf('function BindModal'), source.indexOf('function AccountSettingsPicker'))
-  assert.ok(bind.length > 0)
-  assert.match(bind, /const showTabs = hasQr && hasManual/)
-  assert.match(bind, /hasQr && h\("div", showTabs \? \{ className: "ima-bind-panel", id: "ima-bind-panel-qr", role: "tabpanel", "aria-labelledby": "ima-bind-tab-qr", hidden: tab !== "qr" \} : null/)
-  assert.match(bind, /hasManual && h\("div", showTabs \? \{ className: "ima-bind-panel", id: "ima-bind-panel-manual", role: "tabpanel", "aria-labelledby": "ima-bind-tab-manual", hidden: tab !== "manual" \} : null/)
+
+function renderBinding(kind) {
+  const source = readFileSync(new URL('../lib/client.js', import.meta.url), 'utf8')
+  const start = source.indexOf('function BindModal(')
+  const end = source.indexOf('    const BUILT_IN_PERMISSION_LABELS', start)
+  const h = React.createElement
+  const Modal = ({ children, footer }) => h('section', { role: 'dialog' }, children, footer)
+  const env = {
+    useState: React.useState, useEffect: React.useEffect, useCallback: React.useCallback, useRef: React.useRef,
+    h, Modal, Input: 'input', NoticeBar: 'aside',
+    preferredAssistant: () => ({ provider: 'fixture', model: 'model' }),
+    selectableWorkspace: () => '/workspace',
+    hostModalButton: (label, onClick, variant, props) => h('button', { ...props, onClick }, label),
+    hintOf: () => 'Scan to connect', channelLabel: ch => ch.label, fieldLabel: (_ch, field) => field.label,
+  }
+  const BindModal = new Function(...Object.keys(env), source.slice(start, end) + '; return BindModal;')(...Object.values(env))
+  return renderToStaticMarkup(h(BindModal, {
+    ch: { id: 'fixture', label: 'Fixture', kind, fields: [{ key: 'token', label: 'Token', secret: true }] },
+    defaults: { permission: 'review' }, workspaces: [{ path: '/workspace' }], t: key => key,
+  }))
+}
+
+test('扫码渠道的新增入口只渲染二维码操作，不显示凭据或账号配置', () => {
+  const html = renderBinding('qr-or-credentials')
+  assert.match(html, /action.generateQr/)
+  assert.doesNotMatch(html, /<input|ima-account-settings|ima-command-permissions|role="tab"/)
 })
 
-test('页签指示条宽度按 2px 内边距换算，与页签列对齐', () => {
-  const source = readFileSync(new URL('../client.js', import.meta.url), 'utf8')
-  assert.match(source, /\.ima-tabs-wrap \.ima-segmented-tabs>span\{[^}]*width:calc\(\(100% - 4px\)\/var\(--ima-tab-count,2\)\)!important/)
-  assert.match(source, /\.ima-bind-tabs-wrap \.ima-bind-tabs>span\{[^}]*width:calc\(\(100% - 4px\)\/2\)!important/)
-  assert.match(source, /style: \{ "--ima-tab-count": String\(imTabItems\.length\) \}/)
+test('仅凭据渠道保留 Token 输入，不显示账号配置', () => {
+  const html = renderBinding('credentials')
+  assert.match(html, /<input[^>]+type="password"/)
+  assert.doesNotMatch(html, /action.generateQr|ima-account-settings|ima-command-permissions/)
 })

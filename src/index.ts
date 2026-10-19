@@ -44,6 +44,7 @@ export function apply(ctx: Context, config: PluginConfig): void {
   ctx.effect(() => registerPluginUpdater(ctx, {
     endpoint: '/api/michengai/dsh-im-connect/update',
     packageName: '@michengai/dsh-im-connect',
+    repository: 'laoqiu/dsh-im-connect',
     manifestUrl: new URL('../package.json', import.meta.url),
   }), 'im-connect.plugin-updater')
   const permissionPresets = (ctx as Context & { permissionPresets: { defaultPreset: string } }).permissionPresets

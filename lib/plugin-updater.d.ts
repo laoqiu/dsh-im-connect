@@ -23,6 +23,7 @@ export type PluginUpdaterOptions = {
     readonly endpoint: string;
     readonly packageName: string;
     readonly manifestUrl: URL;
+    readonly repository: string;
 };
 type PackageManagerLaunch = {
     command: string;
@@ -64,9 +65,8 @@ export declare function resolveUpdateRuntime(ctx: {
 }): Runtime;
 export declare function shouldNotifyParent(target: Runtime, send?: NodeJS.Process['send']): boolean;
 export declare function isNewerVersion(currentValue: string, candidateValue: string): boolean;
-/** 把刚安装的精确版本并进 profile 白名单。pnpm 每个包名只认第一条，所以必须并进已有 union，不能另起一行，也不能收成裸包名。 */
-export declare function mergeMinimumReleaseAgeExclude(yaml: string, packageSpec: string): string;
-export declare function recordReleaseAgeExclude(profileDir: string, packageSpec: string): Promise<void>;
+/** Read a stable GitHub release tag; drafts, prereleases and malformed tags are not installable. */
+export declare function githubReleaseVersion(value: unknown): string | undefined;
 export declare function registerPluginUpdater(ctx: Context, options: PluginUpdaterOptions): () => void;
 export {};
 //# sourceMappingURL=plugin-updater.d.ts.map

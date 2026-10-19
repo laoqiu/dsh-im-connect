@@ -11,9 +11,8 @@
   [简体中文](README.zh-CN.md) · [Changelog](CHANGELOG.md) · [QQ reference notes](docs/01-当前工作/I022-QQ直接引用接入/00-迭代总览.md) · [Apache-2.0](LICENSE)
 
   [![License: Apache-2.0](https://img.shields.io/badge/License-Apache--2.0-blue.svg)](LICENSE)
-  [![npm package](https://img.shields.io/npm/v/%40michengai%2Fdsh-im-connect.svg?label=npm%20package)](https://www.npmjs.com/package/@michengai/dsh-im-connect)
-  [![npm downloads](https://img.shields.io/npm/dt/%40michengai%2Fdsh-im-connect.svg?label=npm%20downloads)](https://www.npmjs.com/package/@michengai/dsh-im-connect)
-  [![DSH Web Plugin](https://img.shields.io/badge/DSH%20Web-Plugin-0f766e.svg)](https://github.com/MichengAI/dsh-im-connect)
+  [![GitHub release](https://img.shields.io/github/v/release/laoqiu/dsh-im-connect)](https://github.com/laoqiu/dsh-im-connect/releases)
+  [![DSH Web Plugin](https://img.shields.io/badge/DSH%20Web-Plugin-0f766e.svg)](https://github.com/laoqiu/dsh-im-connect)
   [![Node.js 22 or later](https://img.shields.io/badge/Node.js-22%20or%20later-339933.svg?logo=node.js&logoColor=white)](https://nodejs.org/)
   [![Channels](https://img.shields.io/badge/channels-9-238636.svg)](#-supported-channels)
 </div>
@@ -65,12 +64,12 @@ WeChat is QR-only and DM-only, so the same WeChat account that scanned can talk 
 
 | Channel | Status | How to connect | You need |
 |---|---|---|---|
-| 🔔 **DingTalk** | ✅ Ready | QR, or Client ID / Secret | DingTalk open-platform bot; replies prefer AI Card |
-| 🐦 **Feishu** | ✅ Ready | QR, or App ID / App Secret; QR creates the bot automatically | Feishu account, or a self-built bot with App ID / Secret |
-| 🌐 **Lark** | ✅ Ready | QR, or App ID / App Secret | Lark account, or a self-built bot with App ID / Secret |
+| 🔔 **DingTalk** | ✅ Ready | QR | DingTalk open-platform bot; replies prefer AI Card |
+| 🐦 **Feishu** | ✅ Ready | QR; creates the bot automatically | Feishu account, or a self-built bot with App ID / Secret |
+| 🌐 **Lark** | ✅ Ready | QR | Lark account, or a self-built bot with App ID / Secret |
 | 💬 **WeChat** | ✅ Ready* | Official iLink QR | Dedicated account recommended; DM only |
-| 🏢 **WeCom** | ✅ Ready | QR (recommended), or Bot ID / Secret | WeCom intelligent bot |
-| 🐧 **QQ** | ✅ Ready | QR, or AppID / AppSecret | QQ Open Platform bot, not a personal QQ account |
+| 🏢 **WeCom** | ✅ Ready | QR | WeCom intelligent bot |
+| 🐧 **QQ** | ✅ Ready | QR | QQ Open Platform bot, not a personal QQ account |
 | ✈️ **Telegram** | ✅ Ready | Bot Token only | `@BotFather`; do not enable Webhook on the same bot |
 | 🎮 **Discord** | ✅ Ready | Bot Token only | Official Developer Portal bot. Enable the Message Content Intent. The first mention in a text or announcement channel continues in a thread without another mention |
 | 🧩 **Slack** | ✅ Ready | Bot Token and App Token | Create an app at api.slack.com and enable Socket Mode. DMs reply directly; channel mentions reply inside that message's thread, and later replies in the thread need no new mention |
@@ -93,7 +92,7 @@ The receive paths cover WeChat, WeCom, DingTalk, Feishu, Lark, QQ, Telegram, Dis
 
 WeChat, WeCom, DingTalk, Feishu, Lark, QQ, Telegram, Discord, and Slack accept ordinary files through Chat’s upload service for the current session. Send PDFs, documents or spreadsheets for the assistant to process. Format support follows web Chat’s models, tools and file capabilities; uploading does not guarantee that every format can be understood directly.
 
-- Requires the file-upload service on the supported hosts listed below: `0.2.0-rc.1`, `0.2.0-rc.2`, `0.2.1-rc.1`, and `0.2.1-rc.2`. Hosts before `0.2.0`, the `0.2.1` alphas, and stable `0.2.0` are refused by the version gate and the plugin will not run; saved account settings stay in the profile. If you still use a `0.1.x` host, install plugin `0.1.78` instead of `@latest`.
+- Requires the file-upload service on these supported hosts: `0.2.0-rc.1`, `0.2.0-rc.2`, `0.2.1-alpha.2`, `0.2.1-rc.1`, and `0.2.1-rc.2`. Other `0.2.1` alphas, stable `0.2.0`, and earlier hosts remain refused; saved account settings stay in the profile. If you still use a `0.1.x` host, install plugin `0.1.78` instead of `@latest`.
 - Up to 4 ordinary files per message, totaling 20 MiB. Channel download limits also apply.
 - Files become standard Chat attachments and are submitted with session-specific receipts, rather than local-path text.
 - Private admission and group mention rules remain in force. File captions such as `/new` or “allow” are content, not commands or approval responses.
@@ -155,7 +154,7 @@ Each check reports passed, failed, or unverified, with timing and a suggested ne
 
 ## Screenshots
 
-Add accounts under each channel in **Settings → IM Assistant**. Expand a channel and click an account name to add a remark so you can tell users apart; leave it blank to restore the automatic name. The settings button configures workspace, model, permission, private access, and send mode, and can edit the same remark. The **Receive messages** switch is on the account row:
+In **Settings → IM Assistant**, select a platform from the horizontal tabs; use the arrow buttons when the tabs overflow. Platforms with accounts show their account count; empty platforms show no number. Its accounts appear below, or an empty state when none are connected. Account names are plain text; edit the remark in the expanded account form and leave it blank to restore the automatic name. The outlined gear (14px) and chevron (12px) button expands or collapses controls directly below the account. The **Receive messages** switch stays on the account row. Small icons at the heading's right edge open update checks, the project and issue tracker; hover for labels:
 
 ![IM Assistant settings](assets/screenshots/settings-channels.png)
 
@@ -190,7 +189,7 @@ For a desktop workbench, download [DSH Codex Desktop](https://github.com/Micheng
 | [Agency Agents](https://github.com/MichengAI/dsh-agency-agents) | Choose and summon specialists for your task |
 | [Skills Manager](https://github.com/MichengAI/dsh-skills-manager) | Find, enable, create, and import local skills |
 | [Archive Manager](https://github.com/MichengAI/dsh-archive-manager) | Search, restore, or clean up archived conversations |
-| [IM Connect](https://github.com/MichengAI/dsh-im-connect) | Send tasks and receive replies through messaging platforms |
+| [IM Connect](https://github.com/laoqiu/dsh-im-connect) | Send tasks and receive replies through messaging platforms |
 | [Automation](https://github.com/MichengAI/dsh-automation) | Schedule tasks and review each run |
 | [BTW](https://github.com/MichengAI/dsh-btw) | Ask side questions without interrupting the main task |
 | [Simplify](https://github.com/MichengAI/dsh-simplify) | Use `/simplify` to improve code within your Git changes |
@@ -201,56 +200,57 @@ For a desktop workbench, download [DSH Codex Desktop](https://github.com/Micheng
 ## Prerequisites
 
 - A working DeepSeek Harness Web installation with `dsh` available in PowerShell.
-- The current source supports DSH `0.2.0-rc.1`, `0.2.0-rc.2`, `0.2.1-rc.1`, and `0.2.1-rc.2`; `0.2.1-rc.2` is recommended. `0.2.1-alpha.1` through `0.2.1-alpha.5`, stable `0.2.0`, and hosts before `0.2.0` are refused by the version gate: the plugin will not run, and existing IM settings in the profile are not deleted. If you still use a `0.1.x` host, install plugin `0.1.78` instead of `@latest`.
+- The current source supports DSH `0.2.0-rc.1`, `0.2.0-rc.2`, `0.2.1-alpha.2`, `0.2.1-rc.1`, and `0.2.1-rc.2`. This version builds against the alpha.2 SDK; other alphas, stable `0.2.0`, and earlier hosts remain refused. If you still use a `0.1.x` host, install plugin `0.1.78` instead of `@latest`.
 - Examples use the `web` profile; replace it with the target profile.
 - Source installation and development require Node.js 22+. npm installation does not require running `npm install` in an arbitrary directory.
 - After install, restart `dsh web` and hard-refresh the browser before opening **Settings → IM Assistant**.
 
 ## Installation
 
-The installation commands below use the official npm registry.
+### Build and install v1.0.9
 
-### Ask an agent to install it (recommended)
-
-Send the prompt below to any agent that can run terminal commands on your computer. Replace `web` with your actual profile. Once installed, use the plugin in DSH.
-
-```text
-Install the DSH plugin @michengai/dsh-im-connect into my local web profile by running: dsh plugin --profile web add @michengai/dsh-im-connect@latest --registry=https://registry.npmjs.org/. Then run dsh --profile web --dump-config, confirm the configuration includes im-connect, and explain how to reload DSH and start using the plugin.
-```
-
-### Install the latest package from the official npm registry
-
-Run this from any PowerShell directory:
+This fork is maintained at [laoqiu/dsh-im-connect](https://github.com/laoqiu/dsh-im-connect). It retains the package ID `@michengai/dsh-im-connect` so existing plugin registrations remain valid. Releases and updates come from this repository; the upstream npm package does not contain this fork's changes.
 
 ```powershell
-[Console]::OutputEncoding = [System.Text.Encoding]::UTF8
-$OutputEncoding = [System.Text.Encoding]::UTF8
-dsh plugin --profile web add @michengai/dsh-im-connect@latest --registry=https://registry.npmjs.org/
+git clone https://github.com/laoqiu/dsh-im-connect.git
+cd dsh-im-connect
+npm ci
+npm pack
+```
+
+In Desktop's **Plugins → Add plugin**, choose the checkout directory or the generated `michengai-dsh-im-connect-1.0.9.tgz`, then restart Desktop. `npm pack` builds before packaging. For Web, use `dsh plugin --profile web add <local-directory-or-tarball>`. Web and Desktop installations are independent.
+
+After the `v1.0.9` GitHub Release is published, Web can also install its source archive, which includes the committed `lib/` entries:
+
+```powershell
+dsh plugin --profile web add https://github.com/laoqiu/dsh-im-connect/archive/refs/tags/v1.0.9.tar.gz
 dsh --profile web --dump-config
 ```
 
-To pin a release, replace `@latest` with a version such as `@0.1.28`.
+The configuration should include `im-connect`. Restart the host and refresh the browser. Do not copy client files manually: `dsh plugin add` also applies `cordis.patch.yml`.
 
-The configuration output should contain `im-connect`. Restart DSH Web and hard-refresh the browser. Do not copy client files manually: `dsh plugin add` also applies `cordis.patch.yml`.
+For host compatibility tests, set `DSH_BOOT_CONTRACT_ROOT` to the host's `packages/boot/app-boot` directory and run `node --test tests/host-compatibility.test.mjs`. Authentication tests accept `DSH_CONNECTION_CONTRACT_ROOT` pointing to `packages/client/connection`.
 
 ## Updates
 
-The settings title shows the installed version and a **Check for updates** button. When a newer release is available, **Update automatically** runs only when the DSH CLI or Desktop update service is available; otherwise, the dialog provides a profile-specific manual command to copy and run.
+The refresh icon checks the latest stable GitHub Release in `laoqiu/dsh-im-connect` (tag format `v<major>.<minor>.<patch>`). Automatic updates and the copied manual command install that release's source archive. Without a release, the check reports unavailable and the manual command targets the repository's `main` branch. No update is installed automatically without clicking **Update automatically**. Installation requires the DSH CLI or Desktop update service; restart the host afterward.
+
+Tag pushes run tests and publish GitHub Release notes; they do not publish the upstream npm package. Keep the tag and `package.json` version equal, and commit the current `lib/` build before tagging.
 
 ## Usage
 
-Open **Settings → IM Assistant**, select **Add account** under the target channel, then choose that account's workspace, model, permission, private-access mode, and send mode. To register a new workspace, click **Add workspace…** in the dropdown footer to invoke the system folder picker (manual path inputs are disallowed); hosts lacking native folder pickers show "This Host cannot create workspaces" (upgrade to one of the supported host releases listed in Requirements, or add via the host sidebar).
+Open **Settings → IM Assistant**, select a platform, then **Add account**. QR-capable platforms show only QR setup; Telegram, Discord and Slack show only their credential fields. New accounts use the default workspace, current Chat model (or the configured default model), permissions and other defaults. If required defaults are missing, a notice explains what to configure before retrying. After connecting, expand **Settings** on the account row to adjust them. To register a new workspace, use **Add workspace…** in that form's workspace dropdown; hosts without a native directory picker can use the host sidebar instead.
 
 | Goal | Action | Notes |
 | --- | --- | --- |
-| Add an account | Select **Add account** under a channel, choose the account settings, then scan or enter credentials | The same channel can contain multiple accounts; WeChat is QR-only, Feishu / Lark accept QR or App ID / App Secret, Telegram and Discord need a Bot Token, and Slack needs a Bot Token plus an App Token |
-| Change account settings | Expand the channel, select an account, then edit its workspace, model, reasoning effort, permission, private-access mode, or send mode in its settings dialog | Changes affect only that account and apply to its subsequent sessions immediately |
+| Add an account | Select a platform and **Add account**, then scan or enter credentials | Multiple accounts per platform; QR setup for QR-capable platforms, Bot Token for Telegram / Discord, Bot Token plus App Token for Slack; no account configuration form during setup |
+| Change account settings | Click **Settings** on an account to expand its configuration below the row | Changes affect only that account and apply to its subsequent sessions immediately |
 | Pause receiving | Turn off **Receive messages** on the account row | Credentials and settings stay; only new inbound messages for that account pause |
 | Send work from IM | WeChat / Feishu / Lark / QQ QR scanners can DM immediately; DingTalk / WeCom scanners and other users need approval. Groups only need a mention | Each chat has its own channel session |
 | Split input | End with `..` to continue, `!!` to flush now | Default merge window is about 5 seconds |
 | Start a new session | Send `/new` or `/clear` | Creates and switches the current IM session; previous sessions stay in the Channels list without affecting web tasks |
 | Status / help | Send `/status` or `/help` | Current session and dynamically discovered Chat commands |
-| Agent preset | Choose **Agent preset** when adding or editing an account | Uses the Chat roster; changes apply to new sessions while previous sessions keep their preset |
+| Agent preset | Expand an account's settings and choose **Agent preset** | Uses the Chat roster; changes apply to new sessions while previous sessions keep their preset |
 | Command permissions | Open Settings on the account row and toggle DM/group commands | Admission is checked first; disabling commands keeps conversation and approval/question replies available |
 | Sessions / workspaces | `/sessions`, `/session <number or ID>`; `/workspaces`, `/workspace <number or ID>` | Resume ordinary Chat sessions; workspace selection creates a session without changing account defaults |
 | Task controls | `/stop`, `/steer <text>`, `/queue` | Stop, provide instructions, or inspect the queue; stopping preserves Host queued messages |
@@ -329,7 +329,7 @@ Use this for debugging or unpublished changes. The cloned directory becomes the 
 $OutputEncoding = [System.Text.Encoding]::UTF8
 # Replace this with an existing projects directory.
 Set-Location "$HOME\Projects"
-git clone https://github.com/MichengAI/dsh-im-connect.git
+git clone https://github.com/laoqiu/dsh-im-connect.git
 Set-Location .\dsh-im-connect
 npm install
 npm test

@@ -1,6 +1,6 @@
 {
   "name": "@michengai/dsh-im-connect",
-  "version": "1.0.8",
+  "version": "1.0.9",
   "description": "DSH IM Connect — 将主流即时通讯平台接入本机 DeepSeek Harness · Connect major messaging platforms to local DeepSeek Harness agents",
   "type": "module",
   "packageManager": "pnpm@11.22.0",
@@ -31,16 +31,17 @@
   ],
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/MichengAI/dsh-im-connect.git"
+    "url": "git+https://github.com/laoqiu/dsh-im-connect.git"
   },
   "bugs": {
-    "url": "https://github.com/MichengAI/dsh-im-connect/issues"
+    "url": "https://github.com/laoqiu/dsh-im-connect/issues"
   },
-  "homepage": "https://github.com/MichengAI/dsh-im-connect#readme",
+  "homepage": "https://github.com/laoqiu/dsh-im-connect#readme",
   "scripts": {
     "build": "tsc -p tsconfig.json && node scripts/copy-client.mjs",
     "test": "npm run build && node --test tests/*.test.mjs",
-    "prepublishOnly": "npm test"
+    "prepublishOnly": "npm test",
+    "prepack": "npm run build"
   },
   "license": "Apache-2.0",
   "engines": {
@@ -54,15 +55,15 @@
     "qrcode": "^1.5.4"
   },
   "peerDependencies": {
-    "@deepseek-ai/cordis": "^4.0.2",
-    "@deepseek-ai/dsh-agent": "0.2.0-rc.1 || 0.2.0-rc.2 || 0.2.1-rc.1 || 0.2.1-rc.2",
-    "@deepseek-ai/dsh-client-locale": "0.2.0-rc.1 || 0.2.0-rc.2 || 0.2.1-rc.1 || 0.2.1-rc.2",
-    "@deepseek-ai/dsh-client-ui-primitives": "0.2.0-rc.1 || 0.2.0-rc.2 || 0.2.1-rc.1 || 0.2.1-rc.2",
-    "@deepseek-ai/dsh-client-ui-settings": "0.2.0-rc.1 || 0.2.0-rc.2 || 0.2.1-rc.1 || 0.2.1-rc.2",
-    "@deepseek-ai/dsh-client-ui-slots": "0.2.0-rc.1 || 0.2.0-rc.2 || 0.2.1-rc.1 || 0.2.1-rc.2",
-    "@deepseek-ai/dsh-host-webserver": "0.2.0-rc.1 || 0.2.0-rc.2 || 0.2.1-rc.1 || 0.2.1-rc.2",
+    "@deepseek-ai/cordis": "^4.0.2 || 4.0.5-alpha.1",
+    "@deepseek-ai/dsh-agent": "0.2.0-rc.1 || 0.2.0-rc.2 || 0.2.1-rc.1 || 0.2.1-rc.2 || 0.2.1-alpha.2",
+    "@deepseek-ai/dsh-client-locale": "0.2.0-rc.1 || 0.2.0-rc.2 || 0.2.1-rc.1 || 0.2.1-rc.2 || 0.2.1-alpha.2",
+    "@deepseek-ai/dsh-client-ui-primitives": "0.2.0-rc.1 || 0.2.0-rc.2 || 0.2.1-rc.1 || 0.2.1-rc.2 || 0.2.1-alpha.2",
+    "@deepseek-ai/dsh-client-ui-settings": "0.2.0-rc.1 || 0.2.0-rc.2 || 0.2.1-rc.1 || 0.2.1-rc.2 || 0.2.1-alpha.2",
+    "@deepseek-ai/dsh-client-ui-slots": "0.2.0-rc.1 || 0.2.0-rc.2 || 0.2.1-rc.1 || 0.2.1-rc.2 || 0.2.1-alpha.2",
+    "@deepseek-ai/dsh-host-webserver": "0.2.0-rc.1 || 0.2.0-rc.2 || 0.2.1-rc.1 || 0.2.1-rc.2 || 0.2.1-alpha.2",
     "react": "^18.2.0",
-    "@deepseek-ai/schemastery": "^3.18.2"
+    "@deepseek-ai/schemastery": "^3.18.2 || 3.18.5-alpha.1"
   },
   "peerDependenciesMeta": {
     "react": {
@@ -70,14 +71,14 @@
     }
   },
   "devDependencies": {
-    "@deepseek-ai/cordis": "4.0.5",
-    "@deepseek-ai/dsh-agent": "0.2.1-rc.2",
-    "@deepseek-ai/dsh-client-locale": "0.2.1-rc.2",
-    "@deepseek-ai/dsh-client-ui-primitives": "0.2.1-rc.2",
-    "@deepseek-ai/dsh-client-ui-settings": "0.2.1-rc.2",
-    "@deepseek-ai/dsh-client-ui-slots": "0.2.1-rc.2",
-    "@deepseek-ai/dsh-host-webserver": "0.2.1-rc.2",
-    "@deepseek-ai/schemastery": "3.18.5",
+    "@deepseek-ai/cordis": "4.0.5-alpha.1",
+    "@deepseek-ai/dsh-agent": "0.2.1-alpha.2",
+    "@deepseek-ai/dsh-client-locale": "0.2.1-alpha.2",
+    "@deepseek-ai/dsh-client-ui-primitives": "0.2.1-alpha.2",
+    "@deepseek-ai/dsh-client-ui-settings": "0.2.1-alpha.2",
+    "@deepseek-ai/dsh-client-ui-slots": "0.2.1-alpha.2",
+    "@deepseek-ai/dsh-host-webserver": "0.2.1-alpha.2",
+    "@deepseek-ai/schemastery": "3.18.5-alpha.1",
     "@types/node": "^22.10.0",
     "@types/qrcode": "^1.5.6",
     "esbuild": "^0.25.0",
@@ -98,9 +99,5 @@
       ],
       "platform": "web"
     }
-  },
-  "publishConfig": {
-    "access": "public",
-    "registry": "https://registry.npmjs.org/"
   }
 }

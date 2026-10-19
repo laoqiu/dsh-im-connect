@@ -32,12 +32,12 @@ test('DSH 子包依赖声明与客户端和服务端实际使用保持一致', (
     '@deepseek-ai/dsh-client-ui-slots',
     '@deepseek-ai/dsh-host-webserver',
   ]
-  const hostUnion = '0.2.0-rc.1 || 0.2.0-rc.2 || 0.2.1-rc.1 || 0.2.1-rc.2'
+  const hostUnion = '0.2.0-rc.1 || 0.2.0-rc.2 || 0.2.1-rc.1 || 0.2.1-rc.2 || 0.2.1-alpha.2'
   for (const packageName of dshPackages) {
     assert.equal(manifest.peerDependencies[packageName], hostUnion)
-    assert.equal(manifest.devDependencies[packageName], '0.2.1-rc.2')
+    assert.equal(manifest.devDependencies[packageName], '0.2.1-alpha.2')
   }
-  assert.equal(manifest.devDependencies['@deepseek-ai/cordis'], '4.0.5')
+  assert.equal(manifest.devDependencies['@deepseek-ai/cordis'], '4.0.5-alpha.1')
   assert.equal(
     manifest.peerDependencies['@deepseek-ai/dsh-client-runtime'],
     undefined,
@@ -260,51 +260,34 @@ test('权限菜单直接使用 Host 官方列表与官方文案', () => {
   assert.doesNotMatch(client, /\.ima-chip-row\.is-risk|is-risk/, '权限菜单必须完全沿用官方样式')
 })
 
-test('添加账号使用 Host 风格选择器且二维码按需生成', () => {
+test('扫码接入按需生成二维码，并沿用客户端默认设置', () => {
   const client = readFileSync(new URL('../client.js', import.meta.url), 'utf8')
-  assert.match(client, /function AccountSettingsPicker\(props\)/)
-  assert.match(client, /h\(AccountSettingsPicker, \{[\s\S]*showAutoNameNote: true/)
-  const bind = client.slice(client.indexOf('function BindModal'), client.indexOf('function AccountSettingsPicker'))
-  assert.doesNotMatch(bind, /compact: true/, '新增账号应使用和设置页相同的两列布局')
-  assert.match(bind, /width: 720/)
-  assert.match(client, /function mainSessionModel\(state\)/)
-  assert.match(client, /modelSelection/)
-  assert.match(client, /readMainSessionModel: \(\) => readMainSessionModel\(ctx\)/)
-  assert.match(client, /className: "ima-account-picker ima-model-select"/)
-  assert.match(client, /props\.createWorkspace/)
-  assert.match(client, /props\.pickDirectory/)
-  assert.doesNotMatch(client, /h\("input", \{[^\n]*settings\.name/)
-  assert.doesNotMatch(client, /ima-qrph|等待二维码/)
-  assert.match(client, /src\s*\? h\("div", \{ className: "ima-qrbox" \}/)
-  assert.match(client, /qrStarted \? t\("bind\.refresh"\) : t\("action\.generateQr"\)/)
-  assert.match(client, /if \(tab !== "qr" \|\| !qrStarted\) return undefined/)
+  const bind = client.slice(client.indexOf('function BindModal'), client.indexOf('const BUILT_IN_PERMISSION_LABELS'))
+  assert.doesNotMatch(bind, /h\(AccountSettingsPicker|h\(CommandPermissionSettings/)
+  assert.match(bind, /preferredAssistant\(defaults, readMainSessionModel\)/)
+  assert.match(bind, /selectableWorkspace\(defaults && defaults\.cwd, workspaces\)/)
+  assert.match(bind, /if \(!hasQr \|\| !qrStarted\) return undefined/)
+  assert.match(bind, /bind\.defaultsRequired/)
 })
 
-test('渠道展开状态不叠加 hover，空渠道不可展开', () => {
+test('平台使用可滚动标签，空平台也可以选择', () => {
   const client = readFileSync(new URL('../client.js', import.meta.url), 'utf8')
-  assert.match(client, /\.ima-platform:not\(\.open\):not\(\.empty\) \.ima-platform-head:hover/)
-  assert.doesNotMatch(client, /(^|\n)\.ima-platform-head:hover\{/)
-  assert.match(client, /const canExpand = \(ch\.accounts \|\| \[\]\)\.length > 0/)
-  assert.match(client, /const open = canExpand && Boolean\(expanded\[ch\.id\]\)/)
-  assert.match(client, /role: canExpand \? "button" : undefined/)
-  assert.match(client, /"aria-expanded": canExpand \? open : undefined/)
-  assert.match(client, /canExpand && h\(IconChevron\)/)
-  assert.doesNotMatch(client, /useState\(\{ weixin: true \}\)/)
-  assert.match(client, /const \[expanded, setExpanded\] = useState\(\{\}\)/)
+  assert.match(client, /function PlatformTabs/)
+  assert.match(client, /role: "tablist"/)
+  assert.match(client, /"aria-selected": ch.id === value/)
+  assert.match(client, /edges.left && h\(Button/)
+  assert.match(client, /edges.right && h\(Button/)
+  assert.doesNotMatch(client, /const canExpand|setExpanded/)
 })
 
-test('渠道分组只显示账号数量，账号子行保留状态和独立操作', () => {
+test('当前平台主区域显示账号、状态和接收开关', () => {
   const client = readFileSync(new URL('../client.js', import.meta.url), 'utf8')
-  const start = client.indexOf('...(ch.accounts || []).map((account)')
-  const end = client.indexOf('selectedAccount &&', start)
-  const rows = client.slice(start, end)
-  assert.ok(start > 0 && end > start)
-  assert.doesNotMatch(rows, /h\(Logo|className: "ima-account-id"/)
+  const rows = client.slice(client.indexOf('...(activeChannel.accounts || []).map((account)'), client.indexOf('editing && h(BindModal'))
   assert.match(rows, /role: "switch"/)
-  assert.match(rows, /setSettingsAccount\(account.id\)/)
   assert.match(rows, /account.connectionState/)
   assert.match(rows, /connection.paused/)
-  assert.match(client, /t\("account.count", \{ count: ch.total \}\)/)
+  assert.match(rows, /setSettingsAccount\(open \? null : account.id\)/)
+  assert.match(client, /h\(AccountEmpty, \{ channel: activeChannel, t \}\)/)
 })
 
 test('账号详情操作按钮允许换行，保持标签可读', () => {
@@ -321,22 +304,18 @@ test('企业微信侧边栏小图标移除白色应用底板并放大有效标�
   assert.match(client, /h\(BrandMark, \{ id, compact: small \}\)/)
 })
 
-test('账号弹窗使用 Ant Modal，不再自制遮罩', () => {
+test('账号配置直接展开在账号行下面，保留新增接入弹窗', () => {
   const client = readFileSync(new URL('../client.js', import.meta.url), 'utf8')
-  assert.match(client, /selectedAccount && h\(Modal,/)
-  assert.match(client, /className: "ima-account-modal"/)
+  assert.match(client, /className: "ima-account-config", role: "region"/)
+  assert.match(client, /"aria-expanded": open/)
+  assert.doesNotMatch(client, /ima-account-modal|selectedAccount && h\(Modal/)
   assert.match(client, /className: "ima-bind-modal"/)
-  assert.doesNotMatch(client, /function AccountModalLayer/)
-  assert.doesNotMatch(client, /ima-page ima-mask/)
-  assert.doesNotMatch(client, /h\("div", \{ className: "ima-mask"/)
 })
 
-test('新增与设置弹窗对齐定时任务宽度 720px，工作区下拉支持 footer 新增工作区', () => {
+test('接入弹窗收窄，工作区选择器保留新增工作区', () => {
   const client = readFileSync(new URL('../client.js', import.meta.url), 'utf8')
-  assert.match(client, /\.ima-bind-modal,\.ima-account-modal\{width:min\(720px,100%\) !important;max-height:100%;min-height:0\}/)
-  assert.match(client, /className: "ima-bind-modal",\s*title:[^,]*,[\s\S]*?width: 720/)
-  assert.match(client, /className: "ima-account-modal",\s*title:[^,]*,[\s\S]*?width: 720/)
-  assert.match(client, /footer:\s*\[\{\s*value:\s*"add-workspace",\s*label:\s*t\("composer\.addWorkspace"\)/)
+  assert.match(client, /\.ima-bind-modal\{width:min\(480px,100%\)/)
+  assert.match(client, /footer:\s*\[\{\s*value:\s*"add-workspace"/)
   assert.match(client, /onFooter:\s*\(\)\s*=>\s*\{\s*onAddWorkspace\(\);\s*\}/)
 })
 
@@ -349,19 +328,19 @@ test('设置页占满宿主内容区，不再限制 1080px', () => {
 test('弹窗内容超出视口时内容区滚动，footer 保持可见', () => {
   const client = readFileSync(new URL('../client.js', import.meta.url), 'utf8')
   assert.match(client, /contentClassName: \["ima-modal-content", contentClassName\]\.filter\(Boolean\)\.join\(" "\)/)
-  assert.match(client, /\.ima-bind-modal>\.ima-modal-content,\.ima-account-modal>\.ima-modal-content\{[^}]*overflow-y:auto/)
+  assert.match(client, /\.ima-bind-modal>\.ima-modal-content\{[^}]*overflow-y:auto/)
 })
 
-test('账号弹窗继承成功色变量，已连接和诊断通过用绿色 Tag，支持 info 状态', () => {
+test('账号配置继承成功色变量，已连接和诊断通过用绿色 Tag，支持 info 状态', () => {
   const client = readFileSync(new URL('../client.js', import.meta.url), 'utf8')
-  assert.match(client, /\.ima-page,\.ima-account-modal,\.ima-bind-modal,\.ima-inspector\{[^}]*--ima-ok/)
-  assert.match(client, /h\(Tag, \{\s*color: account\.receiveConfigured === false \? "warning" : account\.connectionState === "connected" \? "success"/)
+  assert.match(client, /\.ima-page,\.ima-bind-modal,\.ima-inspector\{[^}]*--ima-ok/)
+  assert.match(client, /h\(Tag, \{\s*color: busy\[account.id\] \? "processing" : account\.receiveConfigured === false \? "warning" : account\.connectionState === "connected" \? "success"/)
   assert.match(client, /h\(Tag, \{ color: item\.status === "passed" \? "success"/)
   assert.match(client, /\.ima-tag-info/)
   assert.doesNotMatch(client, /function ChannelCard|\.ima-chip|ima-inspector-empty|ima-diagnostic-passed|\.ima-control\{/)
 })
 
-test('账号通过设置按钮打开弹窗，不再占用列表侧栏', () => {
+test('账号配置默认收起，移除账号后保留相邻账号选择', () => {
   const client = readFileSync(new URL('../client.js', import.meta.url), 'utf8')
   assert.match(client, /const ACCOUNT_SELECTION_KEY = "dsh-im-connect\.settings\.selected-account"/)
   assert.match(client, /useState\(storedAccountSelection\)/)
@@ -369,7 +348,7 @@ test('账号通过设置按钮打开弹窗，不再占用列表侧栏', () => {
   assert.doesNotMatch(client, /\? current : \(\(data\.channels[\s\S]*all\[0\]\?\.id/, '首次进入不能自动选中第一个账号')
   assert.doesNotMatch(client, /settings\.selectAccountTitle/)
   assert.doesNotMatch(client, /settings\.noAccountsTitle/)
-  assert.match(client, /selectedAccount && h\(Modal,/)
+  assert.match(client, /open && h\("div", \{ id: "ima-account-config-"/)
   assert.match(client, /if \(action === "remove" && selected === id\) selectAccount\(removalFallback\)/)
 })
 
@@ -434,16 +413,16 @@ test('IM 自有界面注册双语词典并随 Host 语言刷新', () => {
 test('设置标题旁提供项目主页与问题反馈入口', () => {
   const client = readFileSync(new URL('../client.js', import.meta.url), 'utf8')
   assert.match(client, /className: "ima-title-row"/)
-  assert.match(client, /window\.open\("https:\/\/github\.com\/MichengAI\/dsh-im-connect", "_blank", "noreferrer"\)/)
-  assert.match(client, /window\.open\("https:\/\/github\.com\/MichengAI\/dsh-im-connect\/issues", "_blank", "noreferrer"\)/)
-  assert.match(client, /function GithubMark16\(\)/)
+  assert.match(client, /window\.open\("https:\/\/github\.com\/laoqiu\/dsh-im-connect", "_blank", "noreferrer"\)/)
+  assert.match(client, /window\.open\("https:\/\/github\.com\/laoqiu\/dsh-im-connect\/issues", "_blank", "noreferrer"\)/)
+  assert.match(client, /function ActionIcon\(/)
   assert.match(client, /"settings\.viewProject": "GitHub"/)
   assert.match(client, /"settings\.feedback": "问题反馈"/)
   assert.match(client, /"settings\.feedback": "Issues"/)
   assert.match(client, /className: "ima-title-links"/)
-  assert.match(client, /variant: "outline"[\s\S]*?size: "sm"[\s\S]*?"aria-label": t\("settings\.viewProject"\)/)
-  assert.match(client, /variant: "outline"[\s\S]*?size: "sm"[\s\S]*?"aria-label": t\("settings\.feedback"\)/)
-  assert.match(client, /\.ima-title-links\{display:flex;align-items:center;gap:8px/)
+  assert.match(client, /variant: "ghost"[\s\S]*?size: "sm"[\s\S]*?"aria-label": t\("settings\.viewProject"\)/)
+  assert.match(client, /variant: "ghost"[\s\S]*?size: "sm"[\s\S]*?"aria-label": t\("settings\.feedback"\)/)
+  assert.match(client, /\.ima-title-links\{display:flex;align-items:center;gap:4px;margin-left:auto/)
   assert.match(client, /installSettingsNavIcon\(ctx, \(\) => t\("settings\.label"\)\)/)
   assert.match(client, /data-ima-nav-icon/)
   assert.match(client, /\.ima-btn\{display:inline-flex;align-items:center;justify-content:center/)
@@ -506,7 +485,7 @@ test('设置导航图标走通用 mask 注入，不改宿主 svg 内容', () => 
   assert.equal(button.querySelector('.ima-nav-icon-assistant'), null)
 })
 
-test('设置页账号行和账号设置都能填写名称备注', () => {
+test('账号行只显示名称，备注只能在展开的表单中修改', () => {
   const client = readFileSync(new URL('../client.js', import.meta.url), 'utf8')
   assert.match(client, /"account\.remark": "名称备注"/)
   assert.match(client, /"account\.remark": "Name remark"/)
@@ -517,9 +496,10 @@ test('设置页账号行和账号设置都能填写名称备注', () => {
   const accountPage = client.slice(client.indexOf('function AccountInspector'), client.indexOf('const CHANNEL_RAIL_CSS'))
   assert.match(accountPage, /function AccountRemarkEditor/)
   assert.match(accountPage, /t\("account\.remark"\)/)
-  assert.match(accountPage, /t\("account\.rename"\)/)
   assert.match(accountPage, /maxLength: 40/)
-  assert.match(accountPage, /onAction\(account\.id, "settings", \{ name \}\)/)
+  const rows = accountPage.slice(accountPage.indexOf('...(activeChannel.accounts || []).map'))
+  assert.doesNotMatch(rows, /h\(AccountRemarkEditor/)
+  assert.match(rows, /className: "ima-account-name"/)
   assert.match(accountPage, /save\(\{ name \}\)/)
   assert.doesNotMatch(accountPage, /名称备注|留空恢复自动名称/)
 })
@@ -537,13 +517,11 @@ test('界面亮暗跟随宿主 html/body 的 data-ds-dark-theme，不再引入 A
 
 test('账号页渠道行与账号行用网格对齐，表单单列', () => {
   const client = readFileSync(new URL('../client.js', import.meta.url), 'utf8')
-  assert.match(client, /className: "ima-platform-meta"/)
-  assert.match(client, /\.ima-platform-head\{display:grid;grid-template-columns:auto minmax\(0,1fr\) auto/)
   assert.match(client, /\.ima-account-row\{display:grid;grid-template-columns:minmax\(0,1fr\) auto auto auto/)
   assert.match(client, /\.ima-account-settings\{display:grid;grid-template-columns:repeat\(2,minmax\(0,1fr\)\);gap:14px 16px/)
   assert.match(client, /\.ima-account-settings\.compact\{grid-template-columns:1fr\}/)
-  assert.match(client, /h\(Button, \{ onClick: \(e\) => \{ e\.stopPropagation\(\); setEditing\(ch\.id\); \}/)
-  assert.match(client, /h\(Button, \{ onClick: \(\) => \{ selectAccount\(account\.id\); setSettingsAccount\(account\.id\); \}/)
+  assert.match(client, /setEditing\(activeChannel.id\)/)
+  assert.match(client, /setSettingsAccount\(open \? null : account.id\)/)
   assert.match(client, /variant: mappedVariant/);
   assert.match(client, /function isHostComponent\(component\)/);
   assert.match(client, /typeof component\.render === "function"/);

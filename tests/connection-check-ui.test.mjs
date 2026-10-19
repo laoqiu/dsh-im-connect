@@ -5,7 +5,7 @@ import ts from 'typescript'
 
 const source = readFileSync(new URL('../client.js', import.meta.url), 'utf8')
 const componentStart = source.indexOf('    function AccountConnectionCheck(')
-const componentEnd = source.indexOf('    function GithubMark16(')
+const componentEnd = source.indexOf('    function ActionIcon(')
 assert.ok(componentStart >= 0 && componentEnd > componentStart, '诊断组件切片边界失效，请更新夹具定位')
 const componentSource = source.slice(componentStart, componentEnd)
 const translations = new Function(source.slice(source.indexOf('    const IM_LOCALES ='), source.indexOf('    const h = React.createElement;')) + '; return IM_LOCALES;')()

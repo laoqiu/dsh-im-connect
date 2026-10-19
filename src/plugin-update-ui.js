@@ -103,7 +103,7 @@ function describePluginUpdate(lang, payload, phase, notice) {
     latestVersion: payload?.latestVersion === undefined ? copy.unknown : `v${payload.latestVersion}`,
     profileName: payload?.profileName ?? copy.unknown,
     profileRaw: payload?.profileName ?? "",
-    latestRaw: payload?.latestVersion ?? "latest",
+    installSpec: payload?.installSpec ?? "",
   };
 }
 function createUpdateFlow(request, initial, onPayload) {
@@ -151,7 +151,7 @@ function ensureStyle() {
 function validPayload(value) {
   if (value === null || typeof value !== "object") return false;
   const item = value;
-  return typeof item.packageName === "string" && typeof item.currentVersion === "string" && typeof item.updateAvailable === "boolean" && typeof item.profileName === "string" && typeof item.canAutoUpdate === "boolean" && typeof item.latestCheckFailed === "boolean" && (item.latestVersion === undefined || typeof item.latestVersion === "string");
+  return typeof item.packageName === "string" && typeof item.currentVersion === "string" && typeof item.installSpec === "string" && typeof item.updateAvailable === "boolean" && typeof item.profileName === "string" && typeof item.canAutoUpdate === "boolean" && typeof item.latestCheckFailed === "boolean" && (item.latestVersion === undefined || typeof item.latestVersion === "string");
 }
 async function requestStatus(endpoint, method, signal) {
   const signalOption = signal === undefined ? {} : { signal };
@@ -165,9 +165,9 @@ async function requestStatus(endpoint, method, signal) {
   if (!response.ok || !validPayload(value)) throw new Error(value !== null && typeof value === "object" && typeof value.error === "string" ? value.error : pluginUpdateCopy(document.documentElement.lang).failed);
   return value;
 }
-function manualPluginUpdateCommand(profileName, packageName, version) {
+function manualPluginUpdateCommand(profileName, installSpec) {
   const profile = profileName.trim() === "" ? "" : ` --profile ${profileName.trim()}`;
-  return `dsh plugin${profile} add ${packageName}@${version} --registry=https://registry.npmjs.org/`;
+  return installSpec === "" ? "" : `dsh plugin${profile} add ${installSpec}`;
 }
 function handlePluginUpdateEscape(event, close) {
   if (event.key !== "Escape") return false;
@@ -205,7 +205,7 @@ function UpdateDialog(props) {
   const lang = document.documentElement.lang;
   const view = props.flow.view(lang);
   const name = lang.toLowerCase().startsWith("en") ? props.enName : props.zhName;
-  const command = manualPluginUpdateCommand(view.profileRaw, props.packageName, view.latestRaw);
+  const command = manualPluginUpdateCommand(view.profileRaw, view.installSpec);
   const copyLabel = copyState === "copied" ? view.copy.copied : copyState === "failed" ? view.copy.copyFailed : view.copy.copy;
   return React.createElement(HostThemeProvider, null, React.createElement(Modal, {
     open: true, className: "mpi-dialog", layerOwner: "update", title: `${name} ${view.copy.update}`, onCancel: props.onClose,
@@ -253,9 +253,11 @@ function observePluginUpdate(options) {
     if (buttonRoot === undefined) return;
     if (iconNode === undefined) iconNode = options.createIcon("refresh");
     const icon = iconNode;
-    buttonRoot.render(React.createElement(UpdatePrimitiveButton, {
-      variant: "outline", size: "sm", onClick: openDialog, icon: React.createElement(HostIcon, { node: icon }),
-    }, React.createElement("span", { "data-mpi-label": "" }, pluginUpdateCopy(document.documentElement.lang).check)));
+    const label = pluginUpdateCopy(document.documentElement.lang).check;
+    buttonRoot.render(React.createElement(updatePrimitives.Tooltip, { label, side: "bottom", portal: true }, React.createElement(UpdatePrimitiveButton, {
+      className: "ima-title-action", variant: "ghost", size: "sm", "data-mpi-label": "", "aria-label": label,
+      onClick: openDialog, icon: React.createElement(HostIcon, { node: icon }),
+    })));
   };
   const closeDialog = () => { dialogRoot?.unmount(); dialogRoot = undefined; dialogHost?.remove(); dialogHost = undefined; };
   function openDialog() {
@@ -292,7 +294,7 @@ function observePluginUpdate(options) {
     const existing = links.querySelector(`[data-mpi-check="${options.packageName}"]`);
     if (existing !== null) {
       const label = existing.querySelector("[data-mpi-label]");
-      if (label === null || label.textContent !== pluginUpdateCopy(document.documentElement.lang).check) renderCheck();
+      if (label === null || label.getAttribute("aria-label") !== pluginUpdateCopy(document.documentElement.lang).check) renderCheck();
       return;
     }
     const host = document.createElement("span");

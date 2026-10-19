@@ -11,9 +11,8 @@
   [English](README.md) · [更新日志](CHANGELOG.zh-CN.md) · [QQ 引用交接](docs/01-当前工作/I022-QQ直接引用接入/00-迭代总览.md) · [侧栏协作交接](docs/07-迭代归档/2026/I024-侧栏页签协作与渲染修复/00-迭代总览.md) · [Apache-2.0](LICENSE)
 
   [![许可证：Apache-2.0](https://img.shields.io/badge/许可证-Apache--2.0-blue.svg)](LICENSE)
-  [![npm package](https://img.shields.io/npm/v/%40michengai%2Fdsh-im-connect.svg?label=npm%20package)](https://www.npmjs.com/package/@michengai/dsh-im-connect)
-  [![npm 下载量](https://img.shields.io/npm/dt/%40michengai%2Fdsh-im-connect.svg?label=npm%20%E4%B8%8B%E8%BD%BD%E9%87%8F)](https://www.npmjs.com/package/@michengai/dsh-im-connect)
-  [![DSH Web Plugin](https://img.shields.io/badge/DSH%20Web-Plugin-0f766e.svg)](https://github.com/MichengAI/dsh-im-connect)
+  [![GitHub release](https://img.shields.io/github/v/release/laoqiu/dsh-im-connect)](https://github.com/laoqiu/dsh-im-connect/releases)
+  [![DSH Web Plugin](https://img.shields.io/badge/DSH%20Web-Plugin-0f766e.svg)](https://github.com/laoqiu/dsh-im-connect)
   [![Node.js 22 or later](https://img.shields.io/badge/Node.js-22%20or%20later-339933.svg?logo=node.js&logoColor=white)](https://nodejs.org/)
   [![Channels](https://img.shields.io/badge/channels-9-238636.svg)](#-支持的渠道)
 </div>
@@ -28,9 +27,7 @@
 - **多个账号分别配置**：同一平台可添加多个账号，各自选择工作区、模型、推理强度、权限、私聊准入和发送方式。
 - **手机上完成任务交互**：下任务、读回复、回答单选或多选问题；已批准用户可在私聊中批准或拒绝工具执行。
 - **聊天记录互不混淆**：每个 IM 聊天对应独立会话，在网页工作区「频道」中回看。
-- **按平台扫码或填写凭据**：## 界面预览
-
-在「设置 → IM助理」连接账号，管理消息接收开关。
+- **按平台扫码或填写凭据**：在「设置 → IM助理」连接账号，接入时仅显示二维码或必要凭据，接入后展开账号配置。
 - **控制谁能使用**：群聊通过 @ 触发，私聊按账号的准入设置处理，详见下表。
 
 ## 谁可以驱动助手
@@ -67,12 +64,12 @@
 
 | 渠道 | 状态 | 接入方式 | 需要 |
 | --- | --- | --- | --- |
-| 🔔 **钉钉** | ✅ 可用 | 扫码，或 Client ID / Secret | 钉钉开放平台机器人；回复优先走 AI Card |
-| 🐦 **飞书** | ✅ 可用 | 扫码（自动创建机器人），或 App ID / App Secret | 飞书账号，或自建机器人凭据 |
-| 🌐 **Lark** | ✅ 可用 | 扫码，或 App ID / App Secret | Lark 国际版账号，或自建机器人凭据 |
+| 🔔 **钉钉** | ✅ 可用 | 扫码 | 钉钉开放平台机器人；回复优先走 AI Card |
+| 🐦 **飞书** | ✅ 可用 | 扫码（自动创建机器人） | 飞书账号，或自建机器人凭据 |
+| 🌐 **Lark** | ✅ 可用 | 扫码 | Lark 国际版账号，或自建机器人凭据 |
 | 💬 **微信** | ✅ 可用* | 官方 iLink 扫码 | 建议专用小号；仅私聊 |
-| 🏢 **企业微信** | ✅ 可用 | 扫码（推荐），或 Bot ID / Secret | 企业微信智能机器人 |
-| 🐧 **QQ** | ✅ 可用 | 扫码，或 AppID / AppSecret | QQ 开放平台机器人，不是个人号 |
+| 🏢 **企业微信** | ✅ 可用 | 扫码 | 企业微信智能机器人 |
+| 🐧 **QQ** | ✅ 可用 | 扫码 | QQ 开放平台机器人，不是个人号 |
 | ✈️ **Telegram** | ✅ 可用 | 仅填 Bot Token | `@BotFather`；同一 Bot 不要同时开 Webhook |
 | 🎮 **Discord** | ✅ 可用 | 仅填 Bot Token | Developer Portal 的官方 Bot。打开 Message Content Intent；文字频道和公告频道第一次 @ 后在 Thread 中继续，不必重复 @ |
 | 🧩 **Slack** | ✅ 可用 | 填 Bot Token 与 App Token | api.slack.com 建应用并开启 Socket Mode。私聊直接回复，频道被 @ 后在该消息的线程里回复，线程内后续消息不必重复 @ |
@@ -95,7 +92,7 @@
 
 微信、企业微信、钉钉、飞书、Lark、QQ、Telegram、Discord、Slack 可接收普通文件，并通过 Chat 的上传服务交给当前会话。可以发送 PDF、文档、表格等文件，再让助手读取或处理；能否解析具体格式与网页 Chat 的模型、工具和文件能力一致，不承诺每种格式都能直接理解。
 
-- 需要下列已支持宿主的文件上传服务：`0.2.0-rc.1`、`0.2.0-rc.2`、`0.2.1-rc.1`、`0.2.1-rc.2`。`0.2.0` 之前的宿主、`0.2.1` 的 alpha，以及正式版 `0.2.0` 会被版本门拒绝，插件不会运行；已保存的账号配置仍留在 profile 里。仍在使用 `0.1.x` 的，请安装插件 `0.1.78`，不要装 `@latest`。
+- 需要下列已支持宿主的文件上传服务：`0.2.0-rc.1`、`0.2.0-rc.2`、`0.2.1-alpha.2`、`0.2.1-rc.1`、`0.2.1-rc.2`。其他 `0.2.1` alpha、正式版 `0.2.0` 及更早宿主仍被版本门拒绝；已保存的账号配置保留在 profile 中。仍在使用 `0.1.x` 的，请安装插件 `0.1.78`，不要装 `@latest`。
 - 单条消息最多 4 个普通文件，累计最多 20 MiB，还受渠道下载限制约束。
 - 文件先保存为 Chat 标准附件，通过当前会话专属的凭据提交；不把本地路径文字当作文件输入。
 - 保留私聊准入与群聊提及规则；文件说明中的 `/new` 或“批准”属于普通内容，不执行命令或审批。
@@ -155,7 +152,7 @@ IM 消息发起的处理结束后，会在正文和文件投递完成后给出�
 
 每项显示通过、失败或未验证、耗时和处理建议。诊断不发送测试消息、不额外拉取聊天消息；单项通过不代表完整收发权限已验证。旧后端不支持诊断时会提示重启 DSH 并刷新页面。接口、各渠道能力边界与验证记录见[账号连接诊断](docs/01-当前工作/I015-命令权限与Chat命令/06-账号状态检查.md)。
 
-在「设置 → IM助理」按渠道添加账号。展开渠道后，点击账号名称可填写备注，用来区分是谁在使用；留空则恢复自动名称。设置按钮配置工作区、模型、权限、私聊准入和发送方式，那里也可以改备注；接收消息开关位于账号行：
+在「设置 → IM助理」顶部横向标签中选择平台，超出宽度时可通过左右按钮滚动；有账号的平台显示账号数量，没有账号时不显示数字。下方显示该平台的账号列表，没有账号时显示空状态。账号名称仅显示文本；在展开的账号表单中修改备注，留空则恢复自动名称。账号右侧的线性齿轮（14px）与箭头（12px）按钮可展开、收起下方配置；接收消息开关位于账号行。标题右侧的小图标依次用于检查更新、项目主页和问题反馈，悬停可查看说明：
 
 ![IM 助理设置页](assets/screenshots/settings-channels.png)
 
@@ -190,7 +187,7 @@ IM 消息发起的处理结束后，会在正文和文件投递完成后给出�
 | [Agency Agents](https://github.com/MichengAI/dsh-agency-agents) | 按任务选择并召唤专业角色 |
 | [Skills Manager](https://github.com/MichengAI/dsh-skills-manager) | 统一查找、启停、创建和导入本机技能 |
 | [Archive Manager](https://github.com/MichengAI/dsh-archive-manager) | 搜索、恢复或清理已归档会话 |
-| [IM Connect](https://github.com/MichengAI/dsh-im-connect) | 从消息平台下任务、收回复 |
+| [IM Connect](https://github.com/laoqiu/dsh-im-connect) | 从消息平台下任务、收回复 |
 | [Automation](https://github.com/MichengAI/dsh-automation) | 按计划执行任务，查看每次运行的结果 |
 | [BTW](https://github.com/MichengAI/dsh-btw) | 在当前上下文中临时旁问，不打断主任务 |
 | [Simplify](https://github.com/MichengAI/dsh-simplify) | 用 `/simplify` 整理 Git 改动范围内的代码 |
@@ -201,56 +198,57 @@ IM 消息发起的处理结束后，会在正文和文件投递完成后给出�
 ## 前置条件
 
 - 已可正常运行 DeepSeek Harness Web，且可在 PowerShell 中使用 `dsh`。
-- 当前源码支持 DSH `0.2.0-rc.1`、`0.2.0-rc.2`、`0.2.1-rc.1`、`0.2.1-rc.2`，推荐 `0.2.1-rc.2`。`0.2.1-alpha.1` 到 `0.2.1-alpha.5`、正式版 `0.2.0`，以及 `0.2.0` 之前的宿主都会被版本门拒绝：插件不会运行，profile 里已有的 IM 配置不会被删除。仍在使用 `0.1.x` 的，请安装插件 `0.1.78`，不要装 `@latest`。
+- 当前源码支持 DSH `0.2.0-rc.1`、`0.2.0-rc.2`、`0.2.1-alpha.2`、`0.2.1-rc.1`、`0.2.1-rc.2`。本版本使用 `0.2.1-alpha.2` SDK 编译；其他 alpha、正式版 `0.2.0` 及更早宿主仍被版本门拒绝。仍在使用 `0.1.x` 的，请安装插件 `0.1.78`，不要装 `@latest`。
 - 以下示例使用 `web` profile；请替换为实际目标 profile。
 - 从源码安装或二次开发需要 Node.js 22+；仅从 npm 安装无需在任意目录执行 `npm install`。
 - 安装后必须重启 `dsh web`，并在浏览器硬刷新，才能看到「设置 → IM助理」。
 
 ## 安装
 
-以下安装命令使用官方 npm 源。
+### 构建并安装 v1.0.9
 
-### 让 Agent 帮你安装（推荐）
-
-把下面这段话发给任意能够执行本机终端命令的 Agent。将 `web` 替换为实际使用的 profile；安装完成后，在 DSH 中使用本插件。
-
-```text
-请将 DSH 插件 @michengai/dsh-im-connect 安装到本机 web profile，执行：dsh plugin --profile web add @michengai/dsh-im-connect@latest --registry=https://registry.npmjs.org/。安装后执行 dsh --profile web --dump-config，确认配置包含 im-connect，并告诉我如何重新加载 DSH 和开始使用。
-```
-
-### 从官方 npm 安装最新版
-
-在任意 PowerShell 目录执行：
+本分支维护于 [laoqiu/dsh-im-connect](https://github.com/laoqiu/dsh-im-connect)。保留包标识 `@michengai/dsh-im-connect`，以兼容现有插件注册；发行和更新均来自本仓库，上游 npm 包不包含本分支修改。
 
 ```powershell
-[Console]::OutputEncoding = [System.Text.Encoding]::UTF8
-$OutputEncoding = [System.Text.Encoding]::UTF8
-dsh plugin --profile web add @michengai/dsh-im-connect@latest --registry=https://registry.npmjs.org/
+git clone https://github.com/laoqiu/dsh-im-connect.git
+cd dsh-im-connect
+npm ci
+npm pack
+```
+
+在 Desktop 的「插件 → 添加插件」中选择检出目录或生成的 `michengai-dsh-im-connect-1.0.9.tgz`，安装后重启 Desktop。`npm pack` 会先构建再打包。Web 使用 `dsh plugin --profile web add <本地目录或安装包>`；Desktop 与 Web 的安装记录独立。
+
+发布 `v1.0.9` GitHub Release 后，Web 也可直接安装包含已提交 `lib/` 入口的源码归档：
+
+```powershell
+dsh plugin --profile web add https://github.com/laoqiu/dsh-im-connect/archive/refs/tags/v1.0.9.tar.gz
 dsh --profile web --dump-config
 ```
 
-需要钉死某一版时，把 `@latest` 换成具体版本，例如 `@0.1.28`。
+配置应包含 `im-connect`。安装后重启宿主并刷新浏览器。不要手工复制客户端文件，`dsh plugin add` 会同时应用 `cordis.patch.yml`。
 
-配置输出中应包含 `im-connect`。安装后重启 DSH Web 并在浏览器硬刷新。不要手工复制客户端文件，`dsh plugin add` 会同时应用 `cordis.patch.yml`。
+宿主兼容测试可设置 `DSH_BOOT_CONTRACT_ROOT` 为宿主的 `packages/boot/app-boot` 目录，运行 `node --test tests/host-compatibility.test.mjs`；认证测试的 `DSH_CONNECTION_CONTRACT_ROOT` 指向 `packages/client/connection`。
 
 ## 在线更新
 
-设置标题会显示当前版本和“检查更新”按钮。发现新版后，只有检测到 DSH CLI 或 Desktop 更新服务时才可使用“自动更新”；其他环境会在弹窗中提供可复制、与当前 Profile 对应的手工更新命令。
+刷新图标检查 `laoqiu/dsh-im-connect` 最新稳定 GitHub Release（标签格式为 `v<主版本>.<次版本>.<补丁版本>`）。自动更新和复制的手工命令均安装该 Release 的源码归档；尚未发布 Release 时检查会显示不可用，手工命令指向仓库 `main` 分支。只有点击「自动更新」才会执行安装，并需要 DSH CLI 或 Desktop 更新服务，安装后重启宿主。
+
+推送版本标签后，工作流运行测试并发布 GitHub Release 说明，不向上游 npm 包发布。标签必须与 `package.json` 版本一致，打标签前需提交当前 `lib/` 构建产物。
 
 ## 使用
 
-打开「设置 → IM助理」，在目标渠道点击「添加账号」，并为该账号选择工作区、模型、权限、私聊准入和发送方式。若需要新工作区，可展开工作区下拉列表点击底部的「添加工作区…」直接调起系统文件选择器（禁止手输路径）；不支持原生目录选择器的宿主会提示「当前 Host 无法新增工作区」，请升级到「环境要求」中列出的受支持宿主版本，或直接在宿主侧栏添加工作区。
+打开「设置 → IM助理」，选择平台后点击「添加账号」。支持扫码的平台仅显示扫码接入，Telegram、Discord 和 Slack 仅显示必要的凭据输入。新账号沿用默认工作区、当前 Chat 模型（或已配置的默认模型）、权限等默认值；缺少必要默认值时会提示先配置再重试。接入后点击账号右侧「设置」，即可在账号下方调整配置。需要新工作区时，在该表单的工作区下拉列表选择「添加工作区…」；不支持原生目录选择器的宿主可从宿主侧栏添加。
 
 | 目标 | 操作 | 说明 |
 | --- | --- | --- |
-| 添加账号 | 在对应渠道点击「添加账号」，选择账号配置后扫码或填写凭据 | 同一渠道可添加多个账号；微信仅扫码，飞书 / Lark 支持扫码或填写 App ID / App Secret，Telegram 和 Discord 仅填 Bot Token，Slack 填 Bot Token 与 App Token |
-| 修改账号配置 | 展开渠道并选择账号，在设置弹窗中修改工作区、模型、推理强度、权限、私聊准入或发送方式 | 配置只影响当前账号；保存后该账号的后续会话立即使用新配置 |
+| 添加账号 | 选择平台并点击「添加账号」，扫码或填写凭据 | 同一平台可添加多个账号；支持扫码的平台使用二维码，Telegram 和 Discord 仅填 Bot Token，Slack 填 Bot Token 与 App Token；接入时不显示账号配置表单 |
+| 修改账号配置 | 点击账号右侧「设置」，在该账号下方展开配置 | 配置只影响当前账号；保存后该账号的后续会话立即使用新配置 |
 | 暂停接收 | 关闭账号行上的「接收消息」开关 | 凭据和账号配置保留，只暂停该账号接收新消息 |
 | 在 IM 里下任务 | 微信 / 飞书 / Lark / QQ 扫码用户可直接私聊；钉钉 / 企微扫码者和其他用户需先批准。群聊只需 @ | 每个聊天对应一条独立频道会话 |
 | 分段输入 | 结尾加 `..` 表示还有后续，`!!` 表示立即提交 | 默认约 5 秒合并窗口 |
 | 新开会话 | 发送 `/new` 或 `/clear` | 新建并切换当前 IM 会话；旧会话保留在频道列表，不影响网页任务 |
 | 查看状态 / 帮助 | 发送 `/status` 或 `/help` | 查看当前会话及动态 Chat 命令 |
-| Agent 预设 | 在新增或编辑账号弹窗选择「Agent 预设」 | 使用 Chat 的预设名册；更改后新会话使用新预设，旧会话保持原预设 |
+| Agent 预设 | 展开账号配置后选择「Agent 预设」 | 使用 Chat 的预设名册；更改后新会话使用新预设，旧会话保持原预设 |
 | 命令权限 | 点击账号右侧「设置」，调整私聊、群聊命令开关 | 先准入，再判断命令权限；关闭后仍可正常对话和回答审批、问题 |
 | 会话 / 工作区 | `/sessions`、`/session <序号或ID>`；`/workspaces`、`/workspace <序号或ID>` | 可接续普通 Chat 会话；选择工作区会新建会话，不修改账号默认配置 |
 | 任务控制 | `/stop`、`/steer <内容>`、`/queue` | 停止、补充指令、查看队列；停止保留 Host 排队消息 |
@@ -330,7 +328,7 @@ DSH 后端保持本机监听；远程访问使用受控 HTTPS 反向代理，并
 $OutputEncoding = [System.Text.Encoding]::UTF8
 # 替换为本机已存在的项目目录。
 Set-Location "$HOME\Projects"
-git clone https://github.com/MichengAI/dsh-im-connect.git
+git clone https://github.com/laoqiu/dsh-im-connect.git
 Set-Location .\dsh-im-connect
 npm install
 npm test

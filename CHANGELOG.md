@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.0.9 - 2026-10-19
+
+- Use horizontal platform tabs with account counts, empty states and expandable account configuration; new connections show QR setup or required credentials only.
+- Keep account names as plain text in the list; edit remarks in the expanded form.
+- Use compact outline icons, tighter spacing, blue input focus borders and host keyboard focus styling in both themes.
+- Support DSH `0.2.1-alpha.2` with matching SDK dependencies and build before packaging.
+- Move repository links, stable-release checks and update downloads to `laoqiu/dsh-im-connect`; tag workflows publish GitHub Releases instead of the upstream npm package.
+
 ## 1.0.8 - 2026-10-19
 
 - Let the account settings page fill the host content column by removing the 1080px cap.
