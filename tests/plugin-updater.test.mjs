@@ -5,7 +5,7 @@ import { join } from 'node:path'
 import { pathToFileURL } from 'node:url'
 import test from 'node:test'
 import { handlePluginUpdateEscape, manualPluginUpdateCommand } from '../src/plugin-update-ui.js'
-import { isDshCliEntry, isNewerVersion, isTrustedUpdateRequest, githubReleaseVersion, PLUGIN_UPDATE_HEADER, registerPluginUpdater, resolveUpdateRuntime, shouldNotifyParent } from '../lib/plugin-updater.js'
+import { isDshCliEntry, isNewerVersion, isTrustedUpdateRequest, privateIndexVersion, PLUGIN_UPDATE_HEADER, registerPluginUpdater, resolveUpdateRuntime, shouldNotifyParent } from '../lib/plugin-updater.js'
 
 test('IM 独立更新只接受同源专用请求', () => {
   assert.equal(isNewerVersion('0.1.34', '0.1.35'), true)
@@ -16,7 +16,7 @@ test('IM 独立更新只接受同源专用请求', () => {
   assert.equal(isTrustedUpdateRequest({ headers: { origin: 'http://localhost:3000', host: 'localhost:3000' } }), false)
   assert.equal(isTrustedUpdateRequest({ headers: { [PLUGIN_UPDATE_HEADER]: '1', host: '127.0.0.1:19387' }, socket: { remoteAddress: '::1' } }), true)
   assert.equal(isTrustedUpdateRequest({ headers: { [PLUGIN_UPDATE_HEADER]: '1', origin: 'http://localhost:3000', host: 'localhost:3000' }, socket: { remoteAddress: '192.168.1.8' } }), false)
-  assert.equal(manualPluginUpdateCommand('web', 'https://github.com/laoqiu/dsh-im-connect/archive/refs/tags/v1.0.9.tar.gz'), 'dsh plugin --profile web add https://github.com/laoqiu/dsh-im-connect/archive/refs/tags/v1.0.9.tar.gz')
+  assert.equal(manualPluginUpdateCommand('web', 'https://registry.antistudio.cn/dsh-im-connect/-/dsh-im-connect-1.0.9.tgz'), 'dsh plugin --profile web add https://registry.antistudio.cn/dsh-im-connect/-/dsh-im-connect-1.0.9.tgz')
   assert.equal(isDshCliEntry('C:/tools/dsh/lib/bin.js', { name: '@deepseek-ai/dsh', bin: { dsh: 'lib/bin.js' } }, 'C:/tools/dsh'), true)
   assert.equal(isDshCliEntry('C:/tools/dsh/lib/bin.js', { name: '@deepseek-ai/dsh', bin: { dsh: 'lib/other.js' } }, 'C:/tools/dsh'), false)
   assert.equal(isDshCliEntry('C:/tools/dsh/lib/bin.js', { name: 'other-cli', bin: { dsh: 'lib/bin.js' } }, 'C:/tools/dsh'), false)
@@ -37,7 +37,7 @@ test('IM 客户端与 Host 绑定自身更新入口', async () => {
   const client = await readFile(new URL('../client.js', import.meta.url), 'utf8')
   const updateUi = await readFile(new URL('../src/plugin-update-ui.js', import.meta.url), 'utf8')
   const host = await readFile(new URL('../src/index.ts', import.meta.url), 'utf8')
-  assert.match(client, /packageName: "@michengai\/dsh-im-connect"/)
+  assert.match(client, /packageName: "dsh-im-connect"/)
   assert.match(client, /titleRowSelector: "\.ima-title-row"/)
   assert.match(client, /createIcon: createPluginUpdateIcon/)
   assert.match(client, /ACTION_ICON_PATHS/)
@@ -89,21 +89,22 @@ test('官方 Desktop 在线更新指向 desktop profile，且不通知父进程'
   assert.equal(shouldNotifyParent(runtime, () => {}), false)
 })
 
-test('GitHub 更新仅接受 v 开头的稳定版本标签', () => {
-  assert.equal(githubReleaseVersion({ tag_name: 'v1.0.9', draft: false, prerelease: false }), '1.0.9')
-  for (const value of [null, {}, { tag_name: 'v1.0.9' }, { tag_name: '1.0.9', draft: false, prerelease: false },
-    { tag_name: 'v1.1.0-beta.1', draft: false, prerelease: false },
-    { tag_name: 'v1.0.9/../../main', draft: false, prerelease: false },
-    { tag_name: 'v1.0.9', draft: true, prerelease: false }, { tag_name: 'v1.0.9', draft: false, prerelease: true }]) {
-    assert.equal(githubReleaseVersion(value), undefined)
+function privateIndex(version, packageName = 'dsh-im-connect') {
+  return { format: 1, plugins: [{ name: packageName, versions: [{ version, source: { type: 'npm', registry: 'https://registry.antistudio.cn/' } }] }] }
+}
+
+test('私库索引仅接受自身包名、私库来源和稳定版本', () => {
+  assert.equal(privateIndexVersion(privateIndex('1.0.10'), 'dsh-im-connect'), '1.0.10')
+  for (const value of [null, {}, privateIndex('1.0.10-beta.1'), privateIndex('v1.0.10'), privateIndex('1.0.10/../../main'), privateIndex('1.0.10', 'other-plugin'), { format: 1, plugins: [{ name: 'dsh-im-connect', versions: [{ version: '1.0.10', source: { type: 'npm', registry: 'https://registry.npmjs.org/' } }] }] }]) {
+    assert.equal(privateIndexVersion(value, 'dsh-im-connect'), undefined)
   }
 })
 
-test('检查与安装均来自 fork Release，查询失败和旧版本不会启动安装', async t => {
+test('检查与安装均来自私库，查询失败和旧版本不会启动安装', async t => {
   const dir = await mkdtemp(join(tmpdir(), 'dsh-im-release-'))
   t.after(() => rm(dir, { recursive: true, force: true }))
   await writeFile(join(dir, 'package.json'), JSON.stringify({ version: '1.0.9' }))
-  let release = { tag_name: 'v1.1.0', draft: false, prerelease: false }
+  let release = privateIndex('1.1.0')
   let httpStatus = 200
   let handler
   const installed = [], urls = []
@@ -117,7 +118,7 @@ test('检查与安装均来自 fork Release，查询失败和旧版本不会启�
       if (name === 'profileContext') return { name: 'desktop', dir }
       if (name === 'pluginManager') return { async installBundle(spec) { installed.push(spec); return { application: 'restart-required' } } }
     },
-  }, { endpoint: '/update', packageName: '@michengai/dsh-im-connect', repository: 'laoqiu/dsh-im-connect', manifestUrl: pathToFileURL(join(dir, 'package.json')) })
+  }, { endpoint: '/update', packageName: 'dsh-im-connect', manifestUrl: pathToFileURL(join(dir, 'package.json')) })
   const request = async method => {
     let status, body
     await handler({ method, headers: { [PLUGIN_UPDATE_HEADER]: '1', host: 'localhost:3000', origin: 'http://localhost:3000' }, socket: { remoteAddress: '::1' } }, {
@@ -127,11 +128,11 @@ test('检查与安装均来自 fork Release，查询失败和旧版本不会启�
   }
   const checked = await request('GET')
   assert.equal(checked.body.latestVersion, '1.1.0')
-  assert.equal(checked.body.installSpec, 'https://github.com/laoqiu/dsh-im-connect/archive/refs/tags/v1.1.0.tar.gz')
+  assert.equal(checked.body.installSpec, 'https://registry.antistudio.cn/dsh-im-connect/-/dsh-im-connect-1.1.0.tgz')
   assert.equal(checked.body.updateAvailable, true)
   assert.equal((await request('POST')).status, 200)
   assert.deepEqual(installed, [checked.body.installSpec])
-  release = { tag_name: 'v1.0.8', draft: false, prerelease: false }
+  release = privateIndex('1.0.8')
   assert.equal((await request('POST')).body.updateAvailable, false)
   assert.equal(installed.length, 1)
   httpStatus = 403
@@ -139,5 +140,5 @@ test('检查与安装均来自 fork Release，查询失败和旧版本不会启�
   assert.equal((await request('POST')).status, 503)
   assert.equal(installed.length, 1)
   assert.ok(urls.length >= 5)
-  assert.ok(urls.every(url => url === 'https://api.github.com/repos/laoqiu/dsh-im-connect/releases/latest'))
+  assert.ok(urls.every(url => url === 'https://registry.antistudio.cn/index.json'))
 })

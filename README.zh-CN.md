@@ -211,7 +211,7 @@ IM 消息发起的处理结束后，会在正文和文件投递完成后给出�
 
 ### 构建并安装 v1.0.9
 
-本分支维护于 [laoqiu/dsh-im-connect](https://github.com/laoqiu/dsh-im-connect)。保留包标识 `@michengai/dsh-im-connect`，以兼容现有插件注册；发行和更新均来自本仓库，上游 npm 包不包含本分支修改。
+本分支维护于 [laoqiu/dsh-im-connect](https://github.com/laoqiu/dsh-im-connect)。本分发使用包名 `dsh-im-connect`，发行和更新来自私有 npm 仓库，上游 npm 包不包含本分支修改。安装新版前请移除旧包注册，避免两份插件同时运行。
 
 ```powershell
 git clone https://github.com/laoqiu/dsh-im-connect.git

@@ -16,7 +16,7 @@ type DesktopPnpmHandle = { done: Promise<{ exitCode: number | null; signal: Node
 type DesktopPnpm = { runPlugin(args: readonly string[], invokingDir: string, signal?: AbortSignal): DesktopPnpmHandle }
 type UpdateContext = Context & { webServer: WebServer; get?(name: string): unknown }
 
-export type PluginUpdaterOptions = { readonly endpoint: string; readonly packageName: string; readonly manifestUrl: URL; readonly repository: string }
+export type PluginUpdaterOptions = { readonly endpoint: string; readonly packageName: string; readonly manifestUrl: URL }
 
 type PackageManagerLaunch = { command: string; args: readonly string[]; env?: NodeJS.ProcessEnv }
 type PluginManagerInstall = { installBundle(spec: string): Promise<{ application?: string; error?: { message?: string }; packageResult?: { output?: string } }> }
@@ -235,21 +235,31 @@ function comparePrerelease(left: readonly string[], right: readonly string[]): n
   return 0
 }
 
-/** Read a stable GitHub release tag; drafts, prereleases and malformed tags are not installable. */
-export function githubReleaseVersion(value: unknown): string | undefined {
+export const PRIVATE_REGISTRY = 'https://registry.antistudio.cn/'
+
+/** The existing public market index lists versions; npm handles package authentication. */
+export function privateIndexVersion(value: unknown, packageName: string): string | undefined {
   if (value === null || typeof value !== 'object') return undefined
-  const release = value as { tag_name?: unknown; draft?: unknown; prerelease?: unknown }
-  if (release.draft !== false || release.prerelease !== false || typeof release.tag_name !== 'string') return undefined
-  return /^v\d+\.\d+\.\d+$/.test(release.tag_name) ? release.tag_name.replace(/^v/, '') : undefined
+  const index = value as { format?: unknown; plugins?: unknown }
+  if (index.format !== 1 || !Array.isArray(index.plugins)) return undefined
+  const plugin = index.plugins.find(item => item?.name === packageName)
+  if (!Array.isArray(plugin?.versions)) return undefined
+  let latest: string | undefined
+  for (const item of plugin.versions) {
+    if (typeof item?.version !== 'string' || !/^\d+\.\d+\.\d+$/.test(item.version)) continue
+    if (item.source?.type !== 'npm' || item.source.registry !== PRIVATE_REGISTRY) continue
+    if (latest === undefined || isNewerVersion(latest, item.version)) latest = item.version
+  }
+  return latest
 }
 
-async function latestVersion(repository: string): Promise<string | undefined> {
+async function latestVersion(packageName: string): Promise<string | undefined> {
   try {
-    const response = await fetch(`https://api.github.com/repos/${repository}/releases/latest`, {
-      headers: { accept: 'application/vnd.github+json' }, signal: AbortSignal.timeout(8_000),
+    const response = await fetch(`${PRIVATE_REGISTRY}index.json`, {
+      headers: { accept: 'application/json' }, redirect: 'error', signal: AbortSignal.timeout(8_000),
     })
     if (!response.ok) return undefined
-    return githubReleaseVersion(await response.json())
+    return privateIndexVersion(await response.json(), packageName)
   } catch { return undefined }
 }
 
@@ -261,13 +271,11 @@ async function currentVersion(manifestUrl: URL): Promise<string> {
 
 async function status(options: PluginUpdaterOptions, target: Runtime): Promise<VersionPayload> {
   const current = await currentVersion(options.manifestUrl)
-  const latest = await latestVersion(options.repository)
+  const latest = await latestVersion(options.packageName)
   return {
     packageName: options.packageName,
     currentVersion: current,
-    installSpec: latest === undefined
-      ? `https://github.com/${options.repository}/archive/refs/heads/main.tar.gz`
-      : `https://github.com/${options.repository}/archive/refs/tags/v${latest}.tar.gz`,
+    installSpec: latest === undefined ? '' : `${PRIVATE_REGISTRY}${options.packageName}/-/${options.packageName}-${latest}.tgz`,
     ...(latest === undefined ? {} : { latestVersion: latest }),
     latestCheckFailed: latest === undefined,
     updateAvailable: latest !== undefined && isNewerVersion(current, latest),

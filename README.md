@@ -213,7 +213,7 @@ For a desktop workbench, download [DSH Codex Desktop](https://github.com/Micheng
 
 ### Build and install v1.0.9
 
-This fork is maintained at [laoqiu/dsh-im-connect](https://github.com/laoqiu/dsh-im-connect). It retains the package ID `@michengai/dsh-im-connect` so existing plugin registrations remain valid. Releases and updates come from this repository; the upstream npm package does not contain this fork's changes.
+This fork is maintained at [laoqiu/dsh-im-connect](https://github.com/laoqiu/dsh-im-connect). This distribution uses the package ID `dsh-im-connect`. Releases and updates are provided by the private registry; the upstream npm package does not contain this fork's changes.
 
 ```powershell
 git clone https://github.com/laoqiu/dsh-im-connect.git
@@ -400,3 +400,10 @@ Delivery tracking starts with ordinary IM messages received after this feature i
 Security guidance is in [SECURITY.md](SECURITY.md).
 
 Licensed under [Apache License 2.0](LICENSE).
+
+
+## Private registry distribution
+
+This build is distributed as `dsh-im-connect` through `https://registry.antistudio.cn/`. Update checks use `https://registry.antistudio.cn/index.json`; package downloads use the npm credentials configured in the active DSH profile. GitHub hosts source code and issue reports.
+
+The former `@michengai/dsh-im-connect` package is a separate package identity. Remove that old plugin registration before installing `dsh-im-connect` to avoid running both copies. Existing upstream release history below retains its original package names.

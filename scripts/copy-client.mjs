@@ -1,5 +1,5 @@
 import { readFileSync, writeFileSync } from 'node:fs'
-import { spawnSync } from 'node:child_process'
+import { Script } from 'node:vm'
 import ts from 'typescript'
 
 const ANTD_REQUIRE = /require\s*\(\s*['"]antd(?:\/[^'"]*)?['"]\s*\)/
@@ -119,15 +119,12 @@ const clientBody = client.slice(start, end + "    return module.exports;".length
 assertClientSymbols(["function factory(require) {", helper, clientBody, "}"].join("\n"));
 
 writeFileSync("lib/client.js", [
-  'window.__ModuleLoader__.load({ id: "@michengai/dsh-im-connect", factory: (require) => {',
+  'window.__ModuleLoader__.load({ id: "dsh-im-connect", factory: (require) => {',
   helper,
   clientBody,
   "} });",
   "",
 ].join("\n"));
 
-const check = spawnSync(process.execPath, ["--check", "lib/client.js"], { encoding: "utf8" });
-if (check.status !== 0) {
-  throw new Error(check.stderr || check.stdout || "lib/client.js failed syntax check");
-}
+new Script(readFileSync("lib/client.js", "utf8"), { filename: "lib/client.js" });
 console.log("copy-client succeeded!");

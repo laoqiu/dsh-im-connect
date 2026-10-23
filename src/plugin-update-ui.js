@@ -139,13 +139,13 @@ function ensureStyle() {
   const existing = document.getElementById(STYLE_ID);
   if (existing !== null) {
     // 这张表的 id 被多个插件共用。已有归属时不改写，避免本插件重载删掉别人的表。
-    if (existing.getAttribute("data-plugin") === null) existing.setAttribute("data-plugin", "@michengai/dsh-im-connect");
+    if (existing.getAttribute("data-plugin") === null) existing.setAttribute("data-plugin", "dsh-im-connect");
     return;
   }
   const style = document.createElement("style");
   style.id = STYLE_ID;
   style.textContent = CSS;
-  style.setAttribute("data-plugin", "@michengai/dsh-im-connect");
+  style.setAttribute("data-plugin", "dsh-im-connect");
   (document.head ?? document.documentElement).append(style);
 }
 function validPayload(value) {

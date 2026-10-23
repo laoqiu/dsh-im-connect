@@ -23,7 +23,6 @@ export type PluginUpdaterOptions = {
     readonly endpoint: string;
     readonly packageName: string;
     readonly manifestUrl: URL;
-    readonly repository: string;
 };
 type PackageManagerLaunch = {
     command: string;
@@ -65,8 +64,9 @@ export declare function resolveUpdateRuntime(ctx: {
 }): Runtime;
 export declare function shouldNotifyParent(target: Runtime, send?: NodeJS.Process['send']): boolean;
 export declare function isNewerVersion(currentValue: string, candidateValue: string): boolean;
-/** Read a stable GitHub release tag; drafts, prereleases and malformed tags are not installable. */
-export declare function githubReleaseVersion(value: unknown): string | undefined;
+export declare const PRIVATE_REGISTRY = "https://registry.antistudio.cn/";
+/** The existing public market index lists versions; npm handles package authentication. */
+export declare function privateIndexVersion(value: unknown, packageName: string): string | undefined;
 export declare function registerPluginUpdater(ctx: Context, options: PluginUpdaterOptions): () => void;
 export {};
 //# sourceMappingURL=plugin-updater.d.ts.map
