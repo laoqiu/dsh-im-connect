@@ -34,13 +34,13 @@ test('任务页包裹官方 WorkspaceBrowser，不换掉原生树', () => {
 test('原生任务树保留 Host 的 workspace 翻译器', () => {
   assert.match(client, /const officialT = props\.officialT \|\| t/)
   assert.match(client, /officialProps = Object\.assign\(\{\}, props, \{ useSessions: useTaskSessions, t: officialT, openSession, open: openSession \}\)/)
-  assert.match(client, /return h\(HostThemeProvider, null, h\(SessionSwitcher, Object\.assign\(\{\}, props, \{ t, officialT: props\.t, openChannelSettings \}\)\)\)/)
+  assert.match(client, /return h\(HostThemeProvider, null, h\(SessionSwitcher, Object\.assign\(\{\}, props, \{ t, officialT: props\.t \}\)\)\)/)
   assert.doesNotMatch(client, /officialProps = Object\.assign\(\{\}, props, \{ useSessions: useTaskSessions, t \}\)/)
 })
 
 test('注册表已有频道页签时不再渲染硬编码的重复页签', () => {
   assert.match(client, /const hasChannelTab = extraTabs\.some\(\(item\) => item\.id === "channels"\)/)
-  assert.match(client, /!hasChannelTab && h\("button", \{[^\n]+onClick: \(\) => setTab\("channels"\)[^\n]+t\("rail\.channels"\)\)/)
+  assert.match(client, /!hasChannelTab && h\("button", \{[^\n]+onClick: \(\) => setTab\("channels"\)[^\n]+channelTabLabel\(t\("rail\.channels"\)\)\)/)
   assert.doesNotMatch(client, /!hasChannelTab &&\s{2,}h\("button"/)
 })
 
@@ -141,7 +141,7 @@ test('频道会话菜单走官方 Menu，同一时间只开一个', () => {
   assert.match(client, /h\(StateDot, \{ state: primary\.state === "ongoing" \? "ongoing" : primary\.state === "warning" \? "warning" : "done", size: 10 \}\)/)
   assert.doesNotMatch(client, /function RunningStateDot|ima-run-dot/)
   assert.doesNotMatch(client, /function ChannelFolderIcon\(/)
-  assert.match(client, /id: "channel-settings"/)
+  assert.doesNotMatch(client, /id: "channel-settings"/)
   assert.match(client, /--dsh-session-list-scrollbar-width:5px/)
   assert.doesNotMatch(client, /--dsh-session-list-scrollbar-width:8px/)
   assert.doesNotMatch(client, /is-017/)
@@ -160,9 +160,7 @@ test('频道会话菜单走官方 Menu，同一时间只开一个', () => {
   assert.match(client, /const hasCurrentSession = typeof selectedId === "string"/)
   assert.match(client, /\.dcu-wb,\.ima-native\{[^}]*overflow:hidden/)
   assert.match(client, /\.ima-native\.ima-rail/)
-  assert.match(client, /rail\.channelSettings/)
-  assert.match(client, /function openSettingsSection\(/)
-  assert.match(client, /openChannelSettings/)
+  assert.doesNotMatch(client, /rail\.channelSettings|openChannelSettings|function openSettingsSection\(/)
   assert.match(client, /const sessionSnap = typeof rawUseSessions === "function"/)
   assert.match(client, /openListedSession\(resolveHostSessionId\(id, sessionById\)/)
   assert.doesNotMatch(client, /props\.useSessions\(\(state\) => state\)/)
@@ -218,24 +216,20 @@ test('频道列表时间走官方紧凑标签，悬停才加前', () => {
   assert.equal(api.hoverTimeLabel('2026-09-17T12:00:00.000Z', interpolate, now), '1天前')
 })
 
-test('频道文件夹菜单打开对应渠道设置页', () => {
-  const requestCode = extractBlock(client, '    function parseChannelSettingsRequest(', '    function pickSettingsSectionButton(', '渠道设置请求')
-  const requestApi = new Function(requestCode + '; return { parseChannelSettingsRequest, resolveChannelSettingsTarget };')()
-  assert.equal(requestApi.parseChannelSettingsRequest({ channelId: ' wecom ', name: '企业微信' }).channelId, 'wecom')
-  assert.equal(requestApi.parseChannelSettingsRequest({ name: '企业微信' }), undefined)
-  assert.deepEqual(requestApi.resolveChannelSettingsTarget({ channelId: 'wecom' }, [
-    { id: 'wecom', accounts: [{ id: 'wecom:a' }] },
-  ]), { channelId: 'wecom', accountId: 'wecom:a' })
-  assert.deepEqual(requestApi.resolveChannelSettingsTarget({ channelId: 'wecom' }, [
-    { id: 'wecom', accounts: [{ id: 'wecom:a' }, { id: 'wecom:b' }] },
-  ]), { channelId: 'wecom', accountId: undefined })
-  const navCode = extractBlock(client, '    function pickSettingsSectionButton(', '    function requestCodexSettingsSection(', '设置分区按钮')
-  const navApi = new Function(navCode + '; return { pickSettingsSectionButton, pickSettingsLauncher };')()
-  assert.equal(navApi.pickSettingsSectionButton([{ textContent: ' IM助理 ' }, { textContent: '通用' }], ['IM助理', 'IM Assistant']).textContent.trim(), 'IM助理')
-  assert.equal(navApi.pickSettingsLauncher([
-    { textContent: '搜索', getAttribute: () => '' },
-    { textContent: '设置', getAttribute: () => '设置' },
-  ]).textContent, '设置')
+test('频道分组菜单只保留归档操作，没有可用操作时隐藏菜单', () => {
+  const code = extractBlock(client, '    function ChannelGroupRow(', '    function ChannelRail(props)', '频道分组菜单')
+  const h = (type, props, ...children) => ({ type, props: { ...props, children } })
+  const Row = new Function('h', 'HostMenu', 'Logo', 'IconFolderClose', 'IconEllipsisOutline16', 'IconArchiveOutline20', 'fallbackT', code + '; return ChannelGroupRow;')(
+    h, 'menu', 'logo', 'folder', 'more', 'archive', key => key,
+  )
+  const calls = []
+  const props = { id: 'feishu', name: '飞书', expanded: true, onMenuChange: value => calls.push(value), onArchiveGroup: () => calls.push('archive') }
+  const row = Row({ ...props, canArchiveGroup: true })
+  const menu = row.props.children[2].props.children[0]
+  assert.deepEqual(menu.props.items.map(item => item.id), ['archive-group'])
+  menu.props.onSelect('archive-group')
+  assert.deepEqual(calls, [false, 'archive'])
+  assert.equal(Row({ ...props, canArchiveGroup: false }).props.children[2], false)
 })
 
 test('频道列表改模型后仍显示映射会话，只隐藏已归档', () => {

@@ -154,11 +154,15 @@ Each check reports passed, failed, or unverified, with timing and a suggested ne
 
 ## Screenshots
 
+The settings heading uses an 18px title, a 12px version label and subtitle, and compact actions aligned to the right with tooltips below. Their position stays aligned when the page needs a scrollbar.
+
+The Receive messages switch uses a green track and light thumb when enabled in both themes; the disabled receiving state uses neutral gray.
+
 In **Settings → IM Assistant**, select a platform from the horizontal tabs; use the arrow buttons when the tabs overflow. Platforms with accounts show their account count; empty platforms show no number. Its accounts appear below, or an empty state when none are connected. Account names are plain text; edit the remark in the expanded account form and leave it blank to restore the automatic name. The outlined gear (14px) and chevron (12px) button expands or collapses controls directly below the account. The **Receive messages** switch stays on the account row. Small icons at the heading's right edge open update checks, the project and issue tracker; hover for labels:
 
 ![IM Assistant settings](assets/screenshots/settings-channels.png)
 
-The workspace splits **Tasks** and **Channels**. IM sessions appear only under **Channels**:
+The workspace splits **Tasks** and **Channels**. IM sessions appear only under **Channels**. Both tabs use borderless hover styling, and channel search uses the same transparent inline input treatment as task search. Platform menus retain group archiving; account configuration is available under **Settings → IM Assistant**:
 
 ![Workspace channel sidebar](assets/screenshots/workspace-channels.png)
 
@@ -360,6 +364,8 @@ dsh plugin --profile web add .
 When changing channel or session logic, keep the engine platform-agnostic, keep adapters from creating agents, and keep web tasks separate from IM channels.
 
 ### Native sidebar coordination protocol
+
+The Channels tab uses the same icon as Settings → IM Assistant, sized to match the Tasks icon.
 
 IM and Automation share tabs through the active `sidebar.workspaces` entry and the `__dshNativeTabs` registry on the entry or component. This is an inter-plugin convention, not an official stable DSH API. When replacing or restoring a sidebar component or handing over a registry without a host slot notification, the changing plugin should dispatch `dsh-native-sidebar-change` on `window` in a microtask after updating its state (a plain `Event`, with no payload). Receivers reread the active entry. Inserting a tab alone must not forward the event, to avoid notification loops.
 

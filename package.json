@@ -99,5 +99,8 @@
       ],
       "platform": "web"
     }
+  },
+  "publishConfig": {
+    "registry": "https://registry.antistudio.cn/"
   }
 }

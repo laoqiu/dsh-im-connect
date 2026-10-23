@@ -1,5 +1,12 @@
 # Changelog
 
+## Unreleased
+
+- Use a green receiving switch with a light thumb in both themes.
+- Align the settings title, version label, subtitle and compact header actions with the other manager plugins.
+- Remove tab hover borders and keep channel search transparent, matching the native task search.
+- Remove the inactive channel-settings menu item and its navigation code; retain group archiving.
+
 ## 1.0.9 - 2026-10-19
 
 - Use horizontal platform tabs with account counts, empty states and expandable account configuration; new connections show QR setup or required credentials only.

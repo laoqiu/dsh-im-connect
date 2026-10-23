@@ -38,3 +38,8 @@ test-shots/
 .env
 .env.*
 secrets.json
+.npm-cache/
+.npmrc
+*.npmrc
+*.key
+*.tsbuildinfo

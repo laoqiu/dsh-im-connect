@@ -135,7 +135,7 @@ test('归档优先官方导航，否则回退 workspaces.archiveSession', async 
 
 test('停止并归档：运行中拒绝后才带 stopActivity，分组与单会话分开', async () => {
   const helpers = extractBlock(client, '    function probeService(ctx, name) {', '    let openImSession = (id) => {', 'IM 宿主会话双路径')
-  const stop = extractBlock(client, '    async function archiveChannelGroup', '    const CHANNEL_SETTINGS_EVENT', '停止后归档')
+  const stop = extractBlock(client, '    async function archiveChannelGroup', '    const inject =', '停止后归档')
   const { openStopArchive, finishStopArchive } = new Function(`${helpers}\n${stop}\nreturn { openStopArchive, finishStopArchive };`)()
   const opened = []
   assert.equal(openStopArchive({ reason: { name: 'WorkspaceArchiveError' } }, { id: 's', title: 'A' }, (target) => opened.push(target)), true)
